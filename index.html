@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8"/>
+    <title>Final project map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.5.0/mapbox-gl.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.9.0/build/ol/PluggableMap.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.css" type="text/css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        .map-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            background: rgba(255, 255, 255, 0.8);
+            border-style: solid;
+            border-width: 1px;
+            border-color: rgba(0, 0, 0, 0.2);
+            margin-left: 20px;
+            padding-left: 10px;
+            font-family: Arial, sans-serif;
+            overflow: auto;
+            border-radius: 3px;
+        }
+
+        #features {
+            top: 0;
+            height: 130px;
+            margin-top: 20px;
+            width: 270px;
+        }
+
+        #legend {
+            padding: 10px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            line-height: 18px;
+            height: 400px;  
+            margin-bottom: 40px;
+            width: 150px;
+        }
+
+        .legend-key {
+            display: inline-block;
+            border-radius: 20%;
+            width: 10px;
+            height: 10px;
+            margin-right: 5px;
+            margin-top: 7px;
+        }
+        .mapboxgl-canvas-container.mapboxgl-interactive,
+        .mapboxgl-ctrl-group button.mapboxgl-ctrl-compass {
+            cursor: unset;
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <div class='map-overlay' id='features'>
+        <h2>Planned land use 2035</h2>
+        <div id='text-description'>
+            <p>Hover over an area!</p>
+        </div>
+    </div>
+    <div class='map-overlay' id='legend'></div>
+    <script>
+        mapboxgl.accessToken =
+            'pk.eyJ1IjoiamFrb2J6aGFvIiwiYSI6ImNpcms2YWsyMzAwMmtmbG5icTFxZ3ZkdncifQ.P9MBej1xacybKcDN_jehvw';
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/yodapancake/ckwvktfbt17f215oeah0vd5x1',
+            center: [-122.3, 47.6],
+            zoom: 10.6
+        });
+        
+        map.addControl(
+            new MapboxGeocoder({
+
+                accessToken: mapboxgl.accessToken,
+
+                // Limit search results to Australia.
+                countries: 'us',
+                place:'Seattle',
+                
+
+                // Use a bounding box to further limit results
+                // to the geographic bounds representing the
+                // region of New South Wales.
+                // bbox: [-122, 47.5, -122.5, 48],
+
+                // Apply a client-side filter to further limit results
+                // to those strictly within the New South Wales region.
+                filter: function (item) {
+                    // returns true if item contains New South Wales region
+                    return item.context.some((i) => {
+                        // ID is in the form {index}.{id} per https://github.com/mapbox/carmen/blob/master/carmen-geojson.md
+                        // This example searches for the `region`
+                        // named `New South Wales`.
+                        console.log(i.id.split('.').shift())
+                        console.log(i.text)
+                        return (
+                            
+                            i.id.split('.').shift() === 'place' &&
+                            i.text === 'Seattle'
+                        );
+                    });
+                },
+                mapboxgl: mapboxgl
+            })
+        );
+        async function geojsonFetch() {
+            let response = await fetch('Assets/Future_Land_Use__2035.geojson');
+            let seattleData = await response.json();
+            map.on('mousemove', ({point}) => {
+                const seattle = map.queryRenderedFeatures(point, {
+                    layers: ['seattleData-layer','seattleData-layer2']
+                });
+                document.getElementById('text-description').innerHTML = seattle.length ?
+                    `<h3>${seattle[0].properties.FLUM}</strong></p>` :
+                    `<p>Hover over an area!</p>`;
+            });
+
+            map.on('click', 'seattleData-layer2', function (e) {
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(e.features.map(function(feature) { return feature.properties.FLUM; }).join(', '))
+                    .addTo(map);
+            });
+            
+
+            map.on('load', function loadingData() {
+                map.addSource('seattleData', {
+                    type: 'geojson',
+                    data: seattleData
+                });
+                map.addLayer({
+                    'id': 'seattleData-layer2',
+                    'type': 'fill',
+                    'source': 'seattleData',
+                    'paint': {
+                        'fill-color': ['match', ['get','FLUM'],
+                                       'Cemetery', 'blue', 'Hub Urban Village', 'Red','City-Owned Open Space','Green',
+                                       'Residential Urban Village','Purple',
+                                       'Urban Center','Orange','Manufacturing Industrial Center','#000000',
+                                       'Commercial / Mixed Use Areas','#80ffdb','Multi-Family Residential Areas','#247ba0',
+                                       'Major Institutions','violet','Industrial Areas','#001d3d','Neighborhood Residential Areas','yellow', '#fffff0'],
+                        'fill-outline-color': '#BBBBBB',
+                        'fill-opacity': 0.3
+                    }
+
+                });
+                map.addLayer({
+                    'id': 'seattleData-layer',
+                    'type': 'line',
+                    'source': 'seattleData',
+                    'paint': {
+                        'line-color': ['match', ['get','FLUM'],
+                                       'Cemetery', 'blue', 'Hub Urban Village', 'Red','City-Owned Open Space','Green',
+                                       'Residential Urban Village','Purple',
+                                       'Urban Center','Orange','Manufacturing Industrial Center','#000000',
+                                       'Commercial / Mixed Use Areas','#80ffdb','Multi-Family Residential Areas','#247ba0',
+                                       'Major Institutions','violet','Industrial Areas','#001d3d','Neighborhood Residential Areas','yellow','#fffff0'],
+                        //'fill-outline-color': '#BBBBBB',
+                        'line-opacity': 1,
+                        'line-dasharray': [2,3],
+                        'line-width':5
+                    }
+
+                });
+
+                const layers = [
+                    'Cemetery',
+                    'Hub Urban Village',
+                    'City-Owned Open Space',
+                    'Neighborhood Residential Areas',
+                    'Residential Urban Village',
+                    'Urban Center',
+                    'Manufacturing Industrial Center',
+                    'Commercial / Mixed Use Areas',
+                    'Multi-Family Residential Areas',
+                    'Major Institutions',
+                    'Industrial Areas'
+
+                ];
+                const colors = [
+                    'Blue',
+                    'Red',
+                    'Green',
+                    'yellow',
+                    'Purple',
+                    'Orange',
+                    '#000000',
+                    '#80ffdb',
+                    '#247ba0',
+                    'violet',
+                    '#001d3d'
+                ];
+                const legend = document.getElementById('legend');
+                legend.innerHTML = "<b>Planned designation</b><br><br>";
+
+                layers.forEach((layer, i) => {
+                    const color = colors[i];
+                    const item = document.createElement('div');
+                    const key = document.createElement('span');
+                    key.className = 'legend-key';
+                    key.style.backgroundColor = color;
+
+                    const value = document.createElement('span');
+                    value.innerHTML = `${layer}`;
+                    item.appendChild(key);
+                    item.appendChild(value);
+                    legend.appendChild(item);
+                });
+            });
+        };
+
+        geojsonFetch();
+    </script>
+</body>
