@@ -13,4 +13,4 @@ For my **Geog495** final project I built a webgis application that shows you the
 * [MapBox](https://www.mapbox.com/)
 * [Mapbox GL JS](https://docs.mapbox.com/mapbox-gl-js/api/)
 * [Mapbox GL JS Geocoder](https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v4.7.2/mapbox-gl-geocoder.min.js)
-* The poject is also published on [Github](https://github.com/)
+* The project is also published on [Github](https://github.com/)
