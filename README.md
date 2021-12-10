@@ -11,7 +11,7 @@ For my **Geog495** final project I built a webgis application that shows you the
 ### Multiple zone designation example
 ![image](img/multiple_designations.PNG)
 ### Search bar
-![image](img/search bar.PNG)
+![image](img/search_bar.PNG)
 ### Example of clicking
 ![image](img/clicking.PNG)
 ### Example of searching up a location
