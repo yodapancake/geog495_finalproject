@@ -124,7 +124,7 @@
             })
         );
         async function geojsonFetch() {
-            let response = await fetch('Assets/Future_Land_Use__2035.geojson');
+            let response = await fetch('assets/Future_Land_Use__2035.geojson');
             let seattleData = await response.json();
             map.on('mousemove', ({point}) => {
                 const seattle = map.queryRenderedFeatures(point, {
