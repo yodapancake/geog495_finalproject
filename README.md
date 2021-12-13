@@ -28,14 +28,14 @@ The goal of my project is to show people how Seattle is changing over the next f
 [Future Seattle Zoning Plans 2035](https://yodapancake.github.io/geog495_finalproject/)
 
 ## Data Source
-[Seattle GeoData](https://data-seattlecitygis.opendata.arcgis.com/datasets/SeattleCityGIS::future-land-use-2035/about)
+[Seattle Future Land Use GeoData](https://data-seattlecitygis.opendata.arcgis.com/datasets/SeattleCityGIS::future-land-use-2035/about)
 
 ## Acknowledgements
 I would like to acknowledge Professor Zhao for being genuienly passionate and for teaching a wonderful course this quarter filled with useful learning
 
-I would also like to acknowledge mapbox for offering a free version of their services and also providng fantastic documentation to their api
+I would also like to acknowledge mapbox for offering a free version of their services to the online mapping community and also providng fantastic documentation to their api
 
-And finally, I would like to acknowledge the city of Seattle for maintaining and providing such a wide variety of datasets on the city to the public for someone like to create a webGIS application for example.  
+And finally, I would like to acknowledge the city of Seattle for maintaining and providing such a wide variety of datasets on the city to the public for someone like me to create a webGIS application for example.  
 
 ## Applied Libraries
 * [MapBox](https://www.mapbox.com/)
